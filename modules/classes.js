@@ -20,14 +20,13 @@
       console.log(this.books);
     }
   
-    removeBook = (event) => {
-      console.log(event);
+    removeBook = (element) => {
       let bookTitle;
       let bookAuthor;
-      const k = event.parentElement.querySelector('p').textContent;
+      const k = element.parentElement.querySelector('p').textContent;
       [bookTitle, bookAuthor] = k.split(' by ');
       bookTitle = bookTitle.slice(1, -1);
-      event.parentElement.remove();
+      element.parentElement.remove();
       this.books = this.books.filter(
         (item) => item.title !== bookTitle || item.author !== bookAuthor,
       );
