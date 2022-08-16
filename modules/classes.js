@@ -1,8 +1,11 @@
-function BooksArray(books = []) {
-    this.books = books;
-  }
+
   class Methods {
+    constructor(books = [])
+    {
+        this.books=books;
+    }
      addBook = () => {
+      const section = document.querySelector('.books-list');
       const dynamicSection = document.createElement('li');
       dynamicSection.classList.add('row');
       dynamicSection.innerHTML = `
@@ -12,23 +15,26 @@ function BooksArray(books = []) {
       section.appendChild(dynamicSection);
       section.style.cssText = 'border: 4px black solid;';
       const book = { title: title.value, author: author.value };
-      books.books.push(book);
-      window.localStorage.booksCollection = JSON.stringify(books.books);
-      this.style.color = 'black';
+      this.books.push(book);
+      window.localStorage.booksCollection = JSON.stringify(this.books);
+      console.log(this.books);
     }
   
-    removeBook = () => {
-      const k = this.parentElement.querySelector('p').textContent;
+    removeBook = (event) => {
+      console.log(event);
+      let bookTitle;
+      let bookAuthor;
+      const k = event.parentElement.querySelector('p').textContent;
       [bookTitle, bookAuthor] = k.split(' by ');
       bookTitle = bookTitle.slice(1, -1);
-      this.parentElement.remove();
-      books.books = books.books.filter(
+      event.parentElement.remove();
+      this.books = this.books.filter(
         (item) => item.title !== bookTitle || item.author !== bookAuthor,
       );
-      window.localStorage.booksCollection = JSON.stringify(books.books);
-      if (books.books.length === 0) {
+      window.localStorage.booksCollection = JSON.stringify(this.books);
+      if (this.books.length === 0) {
         section.style.cssText = 'border: none;';
       }
     }
   }
-  export {BooksArray,Methods};
+  export {Methods};
