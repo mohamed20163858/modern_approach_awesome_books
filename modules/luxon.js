@@ -1,8 +1,24 @@
+/* eslint-disable no-useless-escape */
+/* eslint-disable no-loop-func */
+/* eslint-disable prefer-rest-params */
+/* eslint-disable no-nested-ternary */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable default-case */
+/* eslint-disable guard-for-in */
+/* eslint-disable brace-style */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-use-before-define */
+/* eslint-disable prefer-const */
+/* eslint-disable no-restricted-globals */
+/* eslint-disable max-len */
+/* eslint-disable no-plusplus */
+/* eslint-disable class-methods-use-this */
+/* eslint-disable no-unused-vars */
 // these aren't really private, but nor are they really useful to document
 /**
  * @private
  */
-/* eslint no-use-before-define: 0 */
+// eslint-disable-next-line max-classes-per-file
 class LuxonError extends Error {}
 
 /**
@@ -237,12 +253,6 @@ const DATETIME_HUGE_WITH_SECONDS = {
   timeZoneName: l,
 };
 
-/*
-   This is just a junk drawer, containing anything used across multiple classes.
-   Because Luxon is small(ish), this should stay small and we won't worry about splitting
-   it up into, say, parsingUtil.js and basicUtil.js and so on. But they are divided up by feature area.
- */
-
 /**
   * @private
   */
@@ -468,9 +478,11 @@ function asNumber(value) {
 
 function normalizeObject(obj, normalizer) {
   const normalized = {};
+  // eslint-disable-next-line no-restricted-syntax
   for (const u in obj) {
     if (hasOwnProperty(obj, u)) {
       const v = obj[u];
+      // eslint-disable-next-line no-continue
       if (v === undefined || v === null) continue;
       normalized[normalizer(u)] = asNumber(v);
     }
@@ -643,6 +655,7 @@ function formatRelativeTime(unit, count, numeric = 'always', narrow = false) {
         return isDay ? 'yesterday' : `last ${units[unit][0]}`;
       case 0:
         return isDay ? 'today' : `this ${units[unit][0]}`;
+      default:
     }
   }
 
@@ -650,6 +663,7 @@ function formatRelativeTime(unit, count, numeric = 'always', narrow = false) {
   const fmtValue = Math.abs(count);
   const singular = fmtValue === 1;
   const lilUnits = units[unit];
+  // eslint-disable-next-line no-nested-ternary
   const fmtUnit = narrow
     ? singular
       ? lilUnits[1]
@@ -662,6 +676,7 @@ function formatRelativeTime(unit, count, numeric = 'always', narrow = false) {
 
 function stringifyTokens(splits, tokenToString) {
   let s = '';
+  // eslint-disable-next-line no-restricted-syntax
   for (const token of splits) {
     if (token.literal) {
       s += token.val;
@@ -709,6 +724,7 @@ class Formatter {
     let currentFull = '';
     let bracketed = false;
     const splits = [];
+    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < fmt.length; i++) {
       const c = fmt.charAt(i);
       if (c === "'") {
@@ -1066,6 +1082,7 @@ class Zone {
     * @abstract
     * @type {string}
     */
+  // eslint-disable-next-line class-methods-use-this
   get type() {
     throw new ZoneIsAbstractError();
   }
@@ -1075,6 +1092,7 @@ class Zone {
     * @abstract
     * @type {string}
     */
+  // eslint-disable-next-line class-methods-use-this
   get name() {
     throw new ZoneIsAbstractError();
   }
@@ -1088,6 +1106,7 @@ class Zone {
     * @abstract
     * @type {boolean}
     */
+  // eslint-disable-next-line class-methods-use-this
   get isUniversal() {
     throw new ZoneIsAbstractError();
   }
@@ -1101,18 +1120,11 @@ class Zone {
     * @param {string} opts.locale - What locale to return the offset name in.
     * @return {string}
     */
+  // eslint-disable-next-line no-unused-vars, class-methods-use-this
   offsetName(ts, opts) {
     throw new ZoneIsAbstractError();
   }
 
-  /**
-    * Returns the offset's value as a string
-    * @abstract
-    * @param {number} ts - Epoch milliseconds for which to get the offset
-    * @param {string} format - What style of offset to return.
-    *                          Accepts 'narrow', 'short', or 'techie'. Returning '+6', '+06:00', or '+0600' respectively
-    * @return {string}
-    */
   formatOffset(ts, format) {
     throw new ZoneIsAbstractError();
   }
@@ -1166,6 +1178,7 @@ class SystemZone extends Zone {
   }
 
   /** @override * */
+  // eslint-disable-next-line class-methods-use-this
   get type() {
     return 'system';
   }
@@ -1196,11 +1209,13 @@ class SystemZone extends Zone {
   }
 
   /** @override * */
+  // eslint-disable-next-line class-methods-use-this
   equals(otherZone) {
     return otherZone.type === 'system';
   }
 
   /** @override * */
+  // eslint-disable-next-line class-methods-use-this
   get isValid() {
     return true;
   }
@@ -1567,7 +1582,7 @@ function normalizeZone(input, defaultZone) {
     return input;
   }
   return new InvalidZone(input);
- }
+}
 
 let now = () => Date.now();
 let defaultZone = 'system';
@@ -6357,20 +6372,6 @@ class DateTime {
       : [];
   }
 
-  /**
-    * Returns an ISO 8601-compliant string representation of this DateTime
-    * @param {Object} opts - options
-    * @param {boolean} [opts.suppressMilliseconds=false] - exclude milliseconds from the format if they're 0
-    * @param {boolean} [opts.suppressSeconds=false] - exclude seconds from the format if they're 0
-    * @param {boolean} [opts.includeOffset=true] - include the offset, such as 'Z' or '-04:00'
-    * @param {boolean} [opts.extendedZone=true] - add the time zone format extension
-    * @param {string} [opts.format='extended'] - choose between the basic and extended format
-    * @example DateTime.utc(1983, 5, 25).toISO() //=> '1982-05-25T00:00:00.000Z'
-    * @example DateTime.now().toISO() //=> '2017-04-22T20:47:05.335-04:00'
-    * @example DateTime.now().toISO({ includeOffset: false }) //=> '2017-04-22T20:47:05.335'
-    * @example DateTime.now().toISO({ format: 'basic' }) //=> '20170422T204705.335-0400'
-    * @return {string}
-    */
   toISO({
     format = 'extended',
     suppressSeconds = false,
@@ -6415,21 +6416,6 @@ class DateTime {
     return toTechFormat(this, "kkkk-'W'WW-c");
   }
 
-  /**
-    * Returns an ISO 8601-compliant string representation of this DateTime's time component
-    * @param {Object} opts - options
-    * @param {boolean} [opts.suppressMilliseconds=false] - exclude milliseconds from the format if they're 0
-    * @param {boolean} [opts.suppressSeconds=false] - exclude seconds from the format if they're 0
-    * @param {boolean} [opts.includeOffset=true] - include the offset, such as 'Z' or '-04:00'
-    * @param {boolean} [opts.extendedZone=true] - add the time zone format extension
-    * @param {boolean} [opts.includePrefix=false] - include the `T` prefix
-    * @param {string} [opts.format='extended'] - choose between the basic and extended format
-    * @example DateTime.utc().set({ hour: 7, minute: 34 }).toISOTime() //=> '07:34:19.361Z'
-    * @example DateTime.utc().set({ hour: 7, minute: 34, seconds: 0, milliseconds: 0 }).toISOTime({ suppressSeconds: true }) //=> '07:34Z'
-    * @example DateTime.utc().set({ hour: 7, minute: 34 }).toISOTime({ format: 'basic' }) //=> '073419.361Z'
-    * @example DateTime.utc().set({ hour: 7, minute: 34 }).toISOTime({ includePrefix: true }) //=> 'T07:34:19.361Z'
-    * @return {string}
-    */
   toISOTime({
     suppressMilliseconds = false,
     suppressSeconds = false,
@@ -6466,14 +6452,6 @@ class DateTime {
     return toTechFormat(this, 'EEE, dd LLL yyyy HH:mm:ss ZZZ', false);
   }
 
-  /**
-    * Returns a string representation of this DateTime appropriate for use in HTTP headers. The output is always expressed in GMT.
-    * Specifically, the string conforms to RFC 1123.
-    * @see https://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3.1
-    * @example DateTime.utc(2014, 7, 13).toHTTP() //=> 'Sun, 13 Jul 2014 00:00:00 GMT'
-    * @example DateTime.utc(2014, 7, 13, 19).toHTTP() //=> 'Sun, 13 Jul 2014 19:00:00 GMT'
-    * @return {string}
-    */
   toHTTP() {
     return toTechFormat(this.toUTC(), "EEE, dd LLL yyyy HH:mm:ss 'GMT'");
   }
@@ -6490,18 +6468,6 @@ class DateTime {
     return toISODate(this, true);
   }
 
-  /**
-    * Returns a string representation of this DateTime appropriate for use in SQL Time
-    * @param {Object} opts - options
-    * @param {boolean} [opts.includeZone=false] - include the zone, such as 'America/New_York'. Overrides includeOffset.
-    * @param {boolean} [opts.includeOffset=true] - include the offset, such as 'Z' or '-04:00'
-    * @param {boolean} [opts.includeOffsetSpace=true] - include the space between the time and the offset, such as '05:15:16.345 -04:00'
-    * @example DateTime.utc().toSQL() //=> '05:15:16.345'
-    * @example DateTime.now().toSQL() //=> '05:15:16.345 -04:00'
-    * @example DateTime.now().toSQL({ includeOffset: false }) //=> '05:15:16.345'
-    * @example DateTime.now().toSQL({ includeZone: false }) //=> '05:15:16.345 America/New_York'
-    * @return {string}
-    */
   toSQLTime({ includeOffset = true, includeZone = false, includeOffsetSpace = true } = {}) {
     let fmt = 'HH:mm:ss.SSS';
 
@@ -6519,18 +6485,6 @@ class DateTime {
     return toTechFormat(this, fmt, true);
   }
 
-  /**
-    * Returns a string representation of this DateTime appropriate for use in SQL DateTime
-    * @param {Object} opts - options
-    * @param {boolean} [opts.includeZone=false] - include the zone, such as 'America/New_York'. Overrides includeOffset.
-    * @param {boolean} [opts.includeOffset=true] - include the offset, such as 'Z' or '-04:00'
-    * @param {boolean} [opts.includeOffsetSpace=true] - include the space between the time and the offset, such as '05:15:16.345 -04:00'
-    * @example DateTime.utc(2014, 7, 13).toSQL() //=> '2014-07-13 00:00:00.000 Z'
-    * @example DateTime.local(2014, 7, 13).toSQL() //=> '2014-07-13 00:00:00.000 -04:00'
-    * @example DateTime.local(2014, 7, 13).toSQL({ includeOffset: false }) //=> '2014-07-13 00:00:00.000'
-    * @example DateTime.local(2014, 7, 13).toSQL({ includeZone: true }) //=> '2014-07-13 00:00:00.000 America/New_York'
-    * @return {string}
-    */
   toSQL(opts = {}) {
     if (!this.isValid) {
       return null;
@@ -6595,13 +6549,6 @@ class DateTime {
     return this.toJSDate();
   }
 
-  /**
-    * Returns a JavaScript object with this DateTime's year, month, day, and so on.
-    * @param opts - options for generating the object
-    * @param {boolean} [opts.includeConfig=false] - include configuration attributes in the output
-    * @example DateTime.now().toObject() //=> { year: 2017, month: 4, day: 22, hour: 20, minute: 49, second: 42, millisecond: 268 }
-    * @return {Object}
-    */
   toObject(opts = {}) {
     if (!this.isValid) return {};
 
@@ -6625,21 +6572,6 @@ class DateTime {
 
   // COMPARE
 
-  /**
-    * Return the difference between two DateTimes as a Duration.
-    * @param {DateTime} otherDateTime - the DateTime to compare this one to
-    * @param {string|string[]} [unit=['milliseconds']] - the unit or array of units (such as 'hours' or 'days') to include in the duration.
-    * @param {Object} opts - options that affect the creation of the Duration
-    * @param {string} [opts.conversionAccuracy='casual'] - the conversion system to use
-    * @example
-    * var i1 = DateTime.fromISO('1982-05-25T09:45'),
-    *     i2 = DateTime.fromISO('1983-10-14T10:30');
-    * i2.diff(i1).toObject() //=> { milliseconds: 43807500000 }
-    * i2.diff(i1, 'hours').toObject() //=> { hours: 12168.75 }
-    * i2.diff(i1, ['months', 'days']).toObject() //=> { months: 16, days: 19.03125 }
-    * i2.diff(i1, ['months', 'days', 'hours']).toObject() //=> { months: 16, days: 19, hours: 0.75 }
-    * @return {Duration}
-    */
   diff(otherDateTime, unit = 'milliseconds', opts = {}) {
     if (!this.isValid || !otherDateTime.isValid) {
       return Duration.invalid('created by diffing an invalid DateTime');
@@ -6656,14 +6588,6 @@ class DateTime {
     return otherIsLater ? diffed.negate() : diffed;
   }
 
-  /**
-    * Return the difference between this DateTime and right now.
-    * See {@link DateTime#diff}
-    * @param {string|string[]} [unit=['milliseconds']] - the unit or units units (such as 'hours' or 'days') to include in the duration
-    * @param {Object} opts - options that affect the creation of the Duration
-    * @param {string} [opts.conversionAccuracy='casual'] - the conversion system to use
-    * @return {Duration}
-    */
   diffNow(unit = 'milliseconds', opts = {}) {
     return this.diff(DateTime.now(), unit, opts);
   }
@@ -6677,15 +6601,6 @@ class DateTime {
     return this.isValid ? Interval.fromDateTimes(this, otherDateTime) : this;
   }
 
-  /**
-    * Return whether this DateTime is in the same unit of time as another DateTime.
-    * Higher-order units must also be identical for this function to return `true`.
-    * Note that time zones are **ignored** in this comparison, which compares the **local** calendar time. Use {@link DateTime#setZone} to convert one of the dates if needed.
-    * @param {DateTime} otherDateTime - the other DateTime
-    * @param {string} unit - the unit of time to check sameness on
-    * @example DateTime.now().hasSame(otherDT, 'day'); //~> true if otherDT is in the same current calendar day
-    * @return {boolean}
-    */
   hasSame(otherDateTime, unit) {
     if (!this.isValid) return false;
 
@@ -6694,13 +6609,6 @@ class DateTime {
     return adjustedToZone.startOf(unit) <= inputMs && inputMs <= adjustedToZone.endOf(unit);
   }
 
-  /**
-    * Equality check
-    * Two DateTimes are equal iff they represent the same millisecond, have the same zone and location, and are both valid.
-    * To compare just the millisecond values, use `+dt1 === +dt2`.
-    * @param {DateTime} other - the other DateTime
-    * @return {boolean}
-    */
   equals(other) {
     return (
       this.isValid
@@ -6711,27 +6619,10 @@ class DateTime {
     );
   }
 
-  /**
-    * Returns a string representation of a this time relative to now, such as "in two days". Can only internationalize if your
-    * platform supports Intl.RelativeTimeFormat. Rounds down by default.
-    * @param {Object} options - options that affect the output
-    * @param {DateTime} [options.base=DateTime.now()] - the DateTime to use as the basis to which this time is compared. Defaults to now.
-    * @param {string} [options.style="long"] - the style of units, must be "long", "short", or "narrow"
-    * @param {string|string[]} options.unit - use a specific unit or array of units; if omitted, or an array, the method will pick the best unit. Use an array or one of "years", "quarters", "months", "weeks", "days", "hours", "minutes", or "seconds"
-    * @param {boolean} [options.round=true] - whether to round the numbers in the output.
-    * @param {number} [options.padding=0] - padding in milliseconds. This allows you to round up the result if it fits inside the threshold. Don't use in combination with {round: false} because the decimal output will include the padding.
-    * @param {string} options.locale - override the locale of this DateTime
-    * @param {string} options.numberingSystem - override the numberingSystem of this DateTime. The Intl system may choose not to honor this
-    * @example DateTime.now().plus({ days: 1 }).toRelative() //=> "in 1 day"
-    * @example DateTime.now().setLocale("es").toRelative({ days: 1 }) //=> "dentro de 1 día"
-    * @example DateTime.now().plus({ days: 1 }).toRelative({ locale: "fr" }) //=> "dans 23 heures"
-    * @example DateTime.now().minus({ days: 2 }).toRelative() //=> "2 days ago"
-    * @example DateTime.now().minus({ days: 2 }).toRelative({ unit: "hours" }) //=> "48 hours ago"
-    * @example DateTime.now().minus({ hours: 36 }).toRelative({ round: false }) //=> "1.5 days ago"
-    */
   toRelative(options = {}) {
     if (!this.isValid) return null;
     const base = options.base || DateTime.fromObject({}, { zone: this.zone });
+    // eslint-disable-next-line no-nested-ternary
     const padding = options.padding ? (this < base ? -options.padding : options.padding) : 0;
     let units = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'];
     let { unit } = options;
@@ -6747,19 +6638,6 @@ class DateTime {
     });
   }
 
-  /**
-    * Returns a string representation of this date relative to today, such as "yesterday" or "next month".
-    * Only internationalizes on platforms that supports Intl.RelativeTimeFormat.
-    * @param {Object} options - options that affect the output
-    * @param {DateTime} [options.base=DateTime.now()] - the DateTime to use as the basis to which this time is compared. Defaults to now.
-    * @param {string} options.locale - override the locale of this DateTime
-    * @param {string} options.unit - use a specific unit; if omitted, the method will pick the unit. Use one of "years", "quarters", "months", "weeks", or "days"
-    * @param {string} options.numberingSystem - override the numberingSystem of this DateTime. The Intl system may choose not to honor this
-    * @example DateTime.now().plus({ days: 1 }).toRelativeCalendar() //=> "tomorrow"
-    * @example DateTime.now().setLocale("es").plus({ days: 1 }).toRelative() //=> ""mañana"
-    * @example DateTime.now().plus({ days: 1 }).toRelativeCalendar({ locale: "fr" }) //=> "demain"
-    * @example DateTime.now().minus({ days: 2 }).toRelativeCalendar() //=> "2 days ago"
-    */
   toRelativeCalendar(options = {}) {
     if (!this.isValid) return null;
 
@@ -6887,10 +6765,6 @@ class DateTime {
     return TIME_WITH_SHORT_OFFSET;
   }
 
-  /**
-    * {@link DateTime#toLocaleString} format like '09:30:23 AM Eastern Daylight Time'. Only 12-hour if the locale is.
-    * @type {Object}
-    */
   static get TIME_WITH_LONG_OFFSET() {
     return TIME_WITH_LONG_OFFSET;
   }
@@ -6927,74 +6801,38 @@ class DateTime {
     return TIME_24_WITH_LONG_OFFSET;
   }
 
-  /**
-    * {@link DateTime#toLocaleString} format like '10/14/1983, 9:30 AM'. Only 12-hour if the locale is.
-    * @type {Object}
-    */
   static get DATETIME_SHORT() {
     return DATETIME_SHORT;
   }
 
-  /**
-    * {@link DateTime#toLocaleString} format like '10/14/1983, 9:30:33 AM'. Only 12-hour if the locale is.
-    * @type {Object}
-    */
   static get DATETIME_SHORT_WITH_SECONDS() {
     return DATETIME_SHORT_WITH_SECONDS;
   }
 
-  /**
-    * {@link DateTime#toLocaleString} format like 'Oct 14, 1983, 9:30 AM'. Only 12-hour if the locale is.
-    * @type {Object}
-    */
   static get DATETIME_MED() {
     return DATETIME_MED;
   }
 
-  /**
-    * {@link DateTime#toLocaleString} format like 'Oct 14, 1983, 9:30:33 AM'. Only 12-hour if the locale is.
-    * @type {Object}
-    */
   static get DATETIME_MED_WITH_SECONDS() {
     return DATETIME_MED_WITH_SECONDS;
   }
 
-  /**
-    * {@link DateTime#toLocaleString} format like 'Fri, 14 Oct 1983, 9:30 AM'. Only 12-hour if the locale is.
-    * @type {Object}
-    */
   static get DATETIME_MED_WITH_WEEKDAY() {
     return DATETIME_MED_WITH_WEEKDAY;
   }
 
-  /**
-    * {@link DateTime#toLocaleString} format like 'October 14, 1983, 9:30 AM EDT'. Only 12-hour if the locale is.
-    * @type {Object}
-    */
   static get DATETIME_FULL() {
     return DATETIME_FULL;
   }
 
-  /**
-    * {@link DateTime#toLocaleString} format like 'October 14, 1983, 9:30:33 AM EDT'. Only 12-hour if the locale is.
-    * @type {Object}
-    */
   static get DATETIME_FULL_WITH_SECONDS() {
     return DATETIME_FULL_WITH_SECONDS;
   }
 
-  /**
-    * {@link DateTime#toLocaleString} format like 'Friday, October 14, 1983, 9:30 AM Eastern Daylight Time'. Only 12-hour if the locale is.
-    * @type {Object}
-    */
   static get DATETIME_HUGE() {
     return DATETIME_HUGE;
   }
 
-  /**
-    * {@link DateTime#toLocaleString} format like 'Friday, October 14, 1983, 9:30:33 AM Eastern Daylight Time'. Only 12-hour if the locale is.
-    * @type {Object}
-    */
   static get DATETIME_HUGE_WITH_SECONDS() {
     return DATETIME_HUGE_WITH_SECONDS;
   }
@@ -7019,6 +6857,7 @@ function friendlyDateTime(dateTimeish) {
 const VERSION = '3.0.1';
 
 export {
+  // eslint-disable-next-line max-len
   DateTime, Duration, FixedOffsetZone, IANAZone, Info, Interval, InvalidZone, Settings, SystemZone, VERSION, Zone,
 };
 // # sourceMappingURL=luxon.js.map
